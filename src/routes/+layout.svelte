@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Navigation }from "$components";
     import "modern-normalize/modern-normalize.css";
     import "../styles/main.scss"; 
     import type {LayoutData} from "./$types";
@@ -10,7 +11,9 @@
 
 <div id="main">
     {#if user}
-        <div id="sidebar">Sidebar</div>
+        <div id="sidebar">
+            <Navigation desktop={true} />
+        </div>
     {/if}
     <div id="contenet">
         <main id="main-content">
