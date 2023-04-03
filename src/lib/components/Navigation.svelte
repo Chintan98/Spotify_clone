@@ -1,14 +1,20 @@
 <script lang="ts">
-    import { Home, Search, ListMusic, type Icon } from "lucide-svelte";
-    import type { ComponentType } from "svelte";
+    import { Home, Search, ListMusic, Menu, X, type Icon, Key } from "lucide-svelte";
+    import { IconButton } from "$components";
+    import { tick, type ComponentType } from "svelte";
     import logo from '$assets/Spotify_Logo_RGB_White.png';
     import { page } from "$app/stores";
 	import { fade } from "svelte/transition";
+	import { beforeNavigate } from "$app/navigation";
     
     export let desktop: boolean;
     
     let isMobileMenuOpen = false;
     $: isOpen = desktop || isMobileMenuOpen;
+
+    let openMenuButton: IconButton;
+    let closeMenuButton: IconButton;
+    let lastFocusableElement: HTMLAnchorElement;
 
     const menuItems: {path: string, label: string, icon: ComponentType<Icon>}[] = [
         {
@@ -28,12 +34,39 @@
         }
     ];
 
-    const openMenu = () => {
+    const openMenu = async () => {
         isMobileMenuOpen = true;
+        await tick();
+        closeMenuButton.getButton().focus();
     }
-    const closeMenu = () => {
+    const closeMenu = async () => {
         isMobileMenuOpen = false;
+        await tick();
+        openMenuButton.getButton().focus();
     }
+    const moveFocusToBottom = (e: KeyboardEvent) => {
+        if (desktop) return;
+        if (e.key === "Tab" && e.shiftKey) {
+            e.preventDefault();
+            lastFocusableElement.focus();
+        }
+    }
+    const moveFocusToTop = (e: KeyboardEvent) => {
+        if (desktop) return;
+        if (e.key === "Tab" && !e.shiftKey) {
+            e.preventDefault();
+            closeMenuButton.getButton().focus();
+        }
+    }
+    const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+            closeMenu();
+        }        
+    }
+    beforeNavigate(() => {
+        isMobileMenuOpen = false;
+    });
+    
 
 </script>
 
@@ -51,24 +84,69 @@
 <div class="nav-content" class:desktop class:mobile={!desktop}>
     {#if !desktop && isMobileMenuOpen}
         <div class="overlay" on:click={closeMenu} 
-        transition:fade={{duration: 200}} />
+        transition:fade={{duration: 200}} 
+        on:keyup={handleEscape}
+        />
     {/if} 
     <nav aria-label="Main">
         {#if !desktop}
-            <button on:click={openMenu}>Open</button>
+        <IconButton 
+        icon={Menu} 
+        label="Open Menu"
+        bind:this={openMenuButton} 
+        on:click={openMenu} 
+        aria-expanded={isOpen}
+        class="menu-button"
+        />
         {/if}
-        <div class="nav-content-inner" class:is-hidden={!isOpen}>
+        <div 
+        class="nav-content-inner" 
+        class:is-hidden={!isOpen} 
+        style:visibility={isOpen ? 'visible' : 'hidden'}
+        on:keyup={handleEscape}
+        >
             {#if !desktop}
-                <button on:click={closeMenu}>Close</button>
+                <IconButton 
+                icon={X} 
+                label="Close Menu"
+                bind:this={closeMenuButton} 
+                on:click={closeMenu}
+                on:keydown={moveFocusToBottom}
+                class="close-menu-button"
+                />
             {/if}
             <img src={logo} alt="logo" class="logo">
             <ul>
-                {#each menuItems as item}
+                {#each menuItems as item, index}
+                {@const iconProps = {
+                    focusable: "false", 
+                    'aria-hidden': true, 
+                    color: "var(--text-color)", 
+                    size: 26, 
+                    strokeWidth: 2
+                }}
                     <li class:active={item.path === $page.url.pathname}>
-                        <a href={item.path}>
-                            <svelte:component this={item.icon} focusable="false" aria-hidden="true" color="var(--text-color)" size={26} strokeWidth={2}/> 
+                        {#if menuItems.length === index + 1}
+                        <a 
+                        href={item.path} 
+                        bind:this={lastFocusableElement}
+                        on:keydown={moveFocusToTop}
+                        >
+                            <svelte:component
+                            this={item.icon}
+                            {...iconProps}
+                            /> 
                             {item.label}
                         </a>
+                        {:else}
+                        <a href={item.path}>
+                            <svelte:component 
+                            this={item.icon} 
+                            {...iconProps}
+                            /> 
+                            {item.label}
+                        </a>
+                        {/if}
                     </li>
                 {/each}
             </ul>
@@ -113,7 +191,7 @@
                         }
                     }
                     a {
-                        display: flex;
+                            display: flex;
                         align-items: center;
                         text-decoration: none;
                         color: var(--text-color);
@@ -148,14 +226,25 @@
             top: 0;
             left: 0;
             z-index: 100;
-            transition: transform 200ms, opacity 200ms;;
+            transition: transform 200ms, opacity 200ms;
             &.is-hidden {
+                transition: transform 200ms, opacity 200ms, visibility 200ms;
                 transform: translateX(-100%);
                 opacity: 0;
             }
             @include breakpoint.down('md') {
                 display: block;
             }
+        }
+        :global(.menu-button) {
+            @include breakpoint.up('md') {
+                display: none;
+            }
+        }
+        :global(.close-menu-button) {
+            position: absolute;
+            top: 20px;
+            right: 20px;
         }
     }
 </style>
