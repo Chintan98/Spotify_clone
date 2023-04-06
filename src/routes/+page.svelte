@@ -35,13 +35,14 @@
 				});
 			}
 		});
-	}
-	if (data.userPlaylists) {
-		sections.push({
-			title: 'User Playlist',
-			path: '/playlists',
-			items: data.userPlaylists.items
-		});
+
+		if (data.userPlaylists) {
+			sections.push({
+				title: 'Your Playlist',
+				path: '/playlists',
+				items: data.userPlaylists.items
+			});
+		}
 	}
 	$: console.log(sections);
 </script>
