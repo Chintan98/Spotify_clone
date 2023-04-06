@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ItemPage } from '$components';
+	import TrackList from '$components/TrackList.svelte';
 	import { getCopyrightSymbol } from '$helpers';
 	import type { PageData } from './$types';
 
@@ -7,13 +8,13 @@
 
 	$: album = data.album;
 
-	$: console.log(album);
+	$: color = data.color;
 </script>
 
 <ItemPage
 	title={album.name}
 	type={album.album_type}
-	color={'orange'}
+	{color}
 	image={album.images.length > 0 ? album.images[0].url : undefined}
 >
 	<p class="meta" slot="meta">
@@ -25,13 +26,7 @@
 			>{`${album.total_tracks} Track${album.total_tracks > 1 ? 's' : ''}`}</span
 		>
 	</p>
-	<div class="tracks">
-		<ul>
-			{#each album.tracks.items as track}
-				<li>{track.name}</li>
-			{/each}
-		</ul>
-	</div>
+	<TrackList tracks={album.tracks.items} />
 
 	<div class="credits">
 		<p class="date">
