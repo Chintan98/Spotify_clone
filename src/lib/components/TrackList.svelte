@@ -76,6 +76,14 @@
 			align-items: center;
 			padding: 7px 5px;
 			border-radius: 4px;
+			@include breakpoint.down('md') {
+				:global(.no-js) & {
+					flex-direction: column;
+					background-color: rgba(255, 255, 255, 0.03);
+					padding: 20px;
+					margin-bottom: 20px;
+				}
+			}
 			&.is-current {
 				.info-column .track-title h4,
 				.number-column span.number {
@@ -87,6 +95,11 @@
 				border-radius: 0px;
 				padding: 5px;
 				margin-bottom: 15px;
+				@include breakpoint.down('md') {
+					:global(.no-js) & {
+						display: none;
+					}
+				}
 				.track-title {
 					color: var(--light-gray);
 					font-size: functions.toRem(12);
@@ -104,7 +117,12 @@
 						.player {
 							display: block;
 						}
-						span.number,
+						span.number {
+							display: none;
+							:global(.no-js) & {
+								display: block;
+							}
+						}
 						.playing-gif {
 							display: none;
 						}
@@ -126,9 +144,29 @@
 				.player {
 					display: none;
 				}
+				:global(html.no-js) & {
+					width: 200px;
+					display: flex;
+					align-items: center;
+					@include breakpoint.down('md') {
+						width: 100%;
+						margin-right: 0;
+						margin-bottom: 15px;
+					}
+					.player {
+						display: block;
+						width: 100%;
+						margin-left: 10px;
+					}
+				}
 			}
 			.info-column {
 				flex: 1;
+				@include breakpoint.down('md') {
+					:global(.no-js) & {
+						width: 100%;
+					}
+				}
 				.track-title {
 					display: flex;
 					align-items: center;
@@ -164,6 +202,12 @@
 				span.duration {
 					color: var(--light-gray);
 					font-size: functions.toRem(14);
+				}
+				@include breakpoint.down('md') {
+					:global(.no-js) & {
+						width: 100%;
+						margin: 10px 0;
+					}
 				}
 			}
 			.actions-column {
