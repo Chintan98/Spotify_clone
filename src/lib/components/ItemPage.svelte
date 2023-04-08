@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Music } from 'lucide-svelte';
-
 	export let color: string | null;
 	export let image: string | undefined;
 	export let title: string;
@@ -17,12 +16,12 @@
 			<img src={image} alt={title} />
 		{:else}
 			<div class="cover-placeholder">
-				<Music focusable="false" aria-hidden="true" color="var(--light-gray)" />
+				<Music focusable="false" aria-hidden color="var(--light-gray)" />
 			</div>
 		{/if}
 	</div>
 	<div class="info">
-		{#if type}<p class="type">{type}</p>{/if}
+		{#if type} <p class="type">{type}</p>{/if}
 		<h1 class="title">{title}</h1>
 		<slot name="meta" />
 	</div>
@@ -45,7 +44,7 @@
 		display: flex;
 		flex-direction: column;
 		margin: calc(-1 * (30px + var(--header-height))) -30px 0;
-		padding: calc((30px + var(--header-height))) 30px 20px;
+		padding: calc(30px + var(--header-height)) 30px 20px;
 		@include breakpoint.up('sm') {
 			flex-direction: row;
 			align-items: flex-end;
@@ -62,7 +61,7 @@
 			z-index: 10;
 			.type {
 				text-transform: uppercase;
-				font-weight: bold;
+				font-weight: 600;
 				font-size: functions.toRem(12);
 				margin: 0;
 			}
@@ -73,7 +72,7 @@
 					font-size: functions.toRem(36);
 				}
 				@include breakpoint.up('lg') {
-					font-size: functions.toRem(52);
+					font-size: functions.toRem(54);
 				}
 			}
 		}

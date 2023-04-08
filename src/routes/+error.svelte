@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Button } from '$components';
-	import { LogoutButton } from '$components';
+	import { Button, LogoutButton } from '$components';
 
 	let isRetrying = false;
-	const retryRoutes = ['/album/[id]'];
+	const retryRoutes = ['/album/[id]', '/playlist/[id]'];
 </script>
 
 <svelte:head>
