@@ -1,25 +1,21 @@
 <script lang="ts">
-	import { ItemPage, Button, TrackList } from '$components';
+	import { page } from '$app/stores';
+	import { Button, ItemPage, TrackList } from '$components';
 	import type { PageData } from './$types';
-
 	export let data: PageData;
 	let isLoading = false;
-
 	$: color = data.color;
 	$: playlist = data.playlist;
 	$: tracks = data.playlist.tracks;
-
+	$: currentPage = $page.url.searchParams.get('page') || 1;
 	let filteredTracks: SpotifyApi.TrackObjectFull[];
-
 	$: {
 		filteredTracks = [];
 		tracks.items.forEach((item) => {
 			if (item.track) filteredTracks = [...filteredTracks, item.track];
 		});
 	}
-
-	const followerFormat = Intl.NumberFormat('en', { notation: 'compact' });
-
+	const followersFormat = Intl.NumberFormat('en', { notation: 'compact' });
 	const loadMoreTracks = async () => {
 		if (!tracks.next) return;
 		isLoading = true;
@@ -44,7 +40,7 @@
 		<p class="playlist-description">{@html playlist.description}</p>
 		<p class="meta">
 			<span>{playlist.owner.display_name}</span>
-			<span>{followerFormat.format(playlist.followers.total)}</span>
+			<span>{followersFormat.format(playlist.followers.total)}</span>
 			<span>{playlist.tracks.total} Tracks</span>
 		</p>
 	</div>
@@ -58,11 +54,35 @@
 				>
 			</div>
 		{/if}
+		<div class="pagination">
+			<div class="previous">
+				{#if tracks.previous}
+					<Button
+						variant="outline"
+						element="a"
+						href="{$page.url.pathname}?{new URLSearchParams({
+							page: `${Number(currentPage) - 1}`
+						}).toString()}">← Previous Page</Button
+					>
+				{/if}
+			</div>
+			<div class="next">
+				{#if tracks.next}
+					<Button
+						variant="outline"
+						element="a"
+						href="{$page.url.pathname}?{new URLSearchParams({
+							page: `${Number(currentPage) + 1}`
+						}).toString()}">Next Page →</Button
+					>
+				{/if}
+			</div>
+		</div>
 	{:else}
 		<div class="empty-playlist">
 			<p>No items added to this playlist yet.</p>
-			<Button element="a" href="/search">Search for content</Button>
-			<Button element="a" href="/playlist">View all Playlists</Button>
+			<Button element="a" href="/search">Search for Content</Button>
+			<Button element="a" href="/playlists">View all Playlists</Button>
 		</div>
 	{/if}
 </ItemPage>
@@ -97,5 +117,16 @@
 	.load-more {
 		padding: 15px;
 		text-align: center;
+		:global(html.no-js) & {
+			display: none;
+		}
+	}
+	.pagination {
+		display: none;
+		margin-top: 40px;
+		justify-content: space-between;
+		:global(html.no-js) & {
+			display: flex;
+		}
 	}
 </style>
