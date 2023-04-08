@@ -2,7 +2,8 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { fetchRefresh } from '$helpers';
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: PageLoad = async ({ fetch, params, depends, route }) => {
+	depends(`app:${route.id}`);
 	const albumRes = await fetchRefresh(fetch, `/api/spotify/albums/${params.id}`);
 	if (!albumRes.ok) {
 		throw error(albumRes.status, 'Failed to load album');
