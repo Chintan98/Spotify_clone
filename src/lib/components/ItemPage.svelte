@@ -9,7 +9,7 @@
 <div class="banner">
 	<div
 		class="banner-gradient"
-		style:background-image="linear-gradient(0deg, transparent, {color || 'var(--light-gray)'}"
+		style:background-image="linear-gradient(0deg, transparent, {color || 'var(--light-gray)'})"
 	/>
 	<div class="cover">
 		{#if image}

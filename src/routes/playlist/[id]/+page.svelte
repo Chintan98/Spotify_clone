@@ -1,12 +1,17 @@
 <script lang="ts">
+	import { applyAction, enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { Button, ItemPage, TrackList } from '$components';
+	import { toasts } from '$stores';
 	import type { ActionData, PageData } from './$types';
 	import { Heart } from 'lucide-svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
+
 	let isLoading = false;
+	let isLoadingFollow = false;
+	let followButton: Button<'button'>;
 
 	$: color = data.color;
 	$: playlist = data.playlist;
@@ -30,7 +35,7 @@
 		if (res.ok) {
 			tracks = { ...resJSON, items: [...tracks.items, ...resJSON.items] };
 		} else {
-			alert(resJSON.error.message || 'Could not load data!');
+			toasts.error(resJSON.error.message || 'Could not load data!');
 		}
 		isLoading = false;
 	};
@@ -60,8 +65,30 @@
 				class="follow-form"
 				method="POST"
 				action={`?/${isFollowing ? 'unFollowPlaylist' : 'followPlaylist'}`}
+				use:enhance={() => {
+					isLoadingFollow = true;
+					return async ({ result }) => {
+						isLoadingFollow = false;
+
+						if (result.type === 'success') {
+							await applyAction(result);
+							isFollowing = !isFollowing;
+						} else if ((result.type = 'failure')) {
+							toasts.error(result.data?.followError);
+						} else {
+							await applyAction(result);
+						}
+						followButton.focus();
+					};
+				}}
 			>
-				<Button element="button" type="submit" variant="outline">
+				<Button
+					bind:this={followButton}
+					element="button"
+					type="submit"
+					variant="outline"
+					disabled={isLoadingFollow}
+				>
 					<Heart aria-hidden focusable="false" fill={isFollowing ? 'var(--text-color)' : 'none'} />
 					{isFollowing ? 'Unfollow' : 'Follow'}
 					<span class="visually-hidden">{playlist.name} playlist</span>
