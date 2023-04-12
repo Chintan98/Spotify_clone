@@ -1,7 +1,6 @@
 <script lang="ts">
-	import Button from '$components/Button.svelte';
 	import type { PageData } from './$types';
-	import { Card } from '$components';
+	import { Card, Button } from '$components';
 
 	export let data: PageData;
 
