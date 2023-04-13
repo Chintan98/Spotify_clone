@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { fly } from 'svelte/transition';
-	import { toasts } from '$stores';
+	import MicroModal from 'micromodal';
 	import { Navigation, Header, Toasts } from '$components';
 	import 'modern-normalize/modern-normalize.css';
 	import '../styles/main.scss';
@@ -10,8 +9,13 @@
 	import { hideAll } from 'tippy.js';
 	import 'nprogress/nprogress.css';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	Nprogress.configure({ showSpinner: false });
+
+	if (browser) {
+		MicroModal.init();
+	}
 
 	let topbar: HTMLElement;
 	let scrollY: number;
