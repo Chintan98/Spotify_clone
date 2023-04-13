@@ -2,13 +2,9 @@
 	import { Button, Card, Pagination } from '$components';
 	import { toasts } from '$stores';
 	import type { PageData } from './$types';
-
 	export let data: PageData;
-
 	let isLoading = false;
-
 	$: playlists = data.userPlaylists;
-
 	async function loadMoreItems() {
 		if (!playlists.next) return;
 		isLoading = true;
@@ -30,18 +26,18 @@
 	{#if playlists.items.length > 0}
 		<div class="title">
 			<h1>{data.title}</h1>
-			<Button element="a">+ Add New</Button>
+			<Button element="a" href="/playlists/new">+ Add New</Button>
 		</div>
 		<div class="grid-items">
 			{#each playlists.items as item}
 				<Card {item} />
 			{/each}
 		</div>
-		<Pagination paginatedList={playlists.items} on:loadmore={loadMoreItems} {isLoading} />
+		<Pagination paginatedList={playlists} on:loadmore={loadMoreItems} {isLoading} />
 	{:else}
 		<div class="empty">
 			<p>No Playlists Yet!</p>
-			<Button element="a">+ Add New</Button>
+			<Button element="a" href="/playlists/new">+ Add New</Button>
 		</div>
 	{/if}
 </div>

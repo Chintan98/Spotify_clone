@@ -1,24 +1,22 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import { Button, ItemPage, TrackList } from '$components';
+	import { Button, ItemPage } from '$components';
+	import TrackList from '$components/TrackList.svelte';
 	import { toasts } from '$stores';
-	import type { ActionData, PageData } from './$types';
 	import { Heart } from 'lucide-svelte';
-
+	import { tick } from 'svelte';
+	import type { ActionData, PageData } from './$types';
 	export let data: PageData;
 	export let form: ActionData;
-
 	let isLoading = false;
 	let isLoadingFollow = false;
 	let followButton: Button<'button'>;
-
 	$: color = data.color;
 	$: playlist = data.playlist;
 	$: tracks = data.playlist.tracks;
 	$: isFollowing = data.isFollowing;
 	$: currentPage = $page.url.searchParams.get('page') || 1;
-
 	let filteredTracks: SpotifyApi.TrackObjectFull[];
 	$: {
 		filteredTracks = [];
@@ -41,7 +39,6 @@
 	};
 </script>
 
-{isFollowing}
 <ItemPage
 	title={playlist.name}
 	image={playlist.images.length > 0 ? playlist.images[0].url : undefined}
@@ -52,14 +49,14 @@
 		<p class="playlist-description">{@html playlist.description}</p>
 		<p class="meta">
 			<span>{playlist.owner.display_name}</span>
-			<span>{followersFormat.format(playlist.followers.total)}</span>
+			<span>{followersFormat.format(playlist.followers.total)} Followers</span>
 			<span>{playlist.tracks.total} Tracks</span>
 		</p>
 	</div>
 
 	<div class="playlist-actions">
 		{#if data.user?.id === playlist.owner.id}
-			<Button element="a" variant="outline">Edit Playist</Button>
+			<Button element="a" variant="outline">Edit Playlist</Button>
 		{:else if isFollowing !== null}
 			<form
 				class="follow-form"
@@ -73,8 +70,9 @@
 						if (result.type === 'success') {
 							await applyAction(result);
 							isFollowing = !isFollowing;
-						} else if ((result.type = 'failure')) {
+						} else if (result.type === 'failure') {
 							toasts.error(result.data?.followError);
+							await tick();
 						} else {
 							await applyAction(result);
 						}

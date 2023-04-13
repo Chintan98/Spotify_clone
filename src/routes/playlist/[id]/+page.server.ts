@@ -1,6 +1,6 @@
 import { SPOTIFY_BASE_URL } from '$env/static/private';
-import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
 
 export const actions: Actions = {
 	followPlaylist: async ({ cookies, params, fetch }) => {

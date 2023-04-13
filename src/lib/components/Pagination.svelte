@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { createEventDispatcher } from 'svelte';
-	import Button from './Button.svelte';
+	import { Button } from '$components';
 
 	export let paginatedList: SpotifyApi.PagingObject<any>;
 	export let isLoading: boolean;
