@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { Player } from '$components';
+	import { Player, Button } from '$components';
 	import { msToTime } from '$helpers';
 	import { tippy } from '$actions';
 	import { Clock8, ListPlus, ListX } from 'lucide-svelte';
 	import playingGif from '$assets/playing.gif';
-	import PlaylistForm from './PlaylistForm.svelte';
-	import Button from './Button.svelte';
+	import { page } from '$app/stores';
 
 	let currentlyPlaying: string | null = null;
 	let isPaused: boolean = false;
@@ -96,8 +95,8 @@
 					{#if userPlaylists}
 						<div class="playlists-menu" style="display: none;" id="{track.id}-playlists-menu">
 							<div class="playlist-menu-content">
-								<form method="POST" action="">
-									<input hidden value={track.id} name={track.id} />
+								<form method="POST" action="/playlist?/addItem&redirect={$page.url.pathname}">
+									<input hidden value={track.id} name="track" />
 									<div class="field">
 										<select name="playlist" aria-label="Playlist">
 											{#each userPlaylists as playlist}
