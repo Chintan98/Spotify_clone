@@ -8,10 +8,12 @@
 	import { enhance } from '$app/forms';
 	import { toasts } from '$stores';
 	import { hideAll } from 'tippy.js';
+	import { invalidate } from '$app/navigation';
 
 	let currentlyPlaying: string | null = null;
 	let isPaused: boolean = false;
 	let isAddingToPlaylist: string[] = [];
+	let isRemovingFromPlaylist: string[] = [];
 
 	export let tracks: SpotifyApi.TrackObjectFull[] | SpotifyApi.TrackObjectSimplified[];
 	export let isOwner: boolean = false;
@@ -72,8 +74,35 @@
 			</div>
 			<div class="actions-column" class:is-owner={isOwner}>
 				{#if isOwner}
-					<form method="POST" action="/playlist/{$page.params.id}?/removeItem">
-						<input hidden name="track" value={track.id} />
+					<form
+						method="POST"
+						action="/playlist/{$page.params.id}?/removeItem"
+						use:enhance={({ cancel }) => {
+							if (isRemovingFromPlaylist.includes(track.id)) {
+								cancel();
+							}
+							isRemovingFromPlaylist = [...isRemovingFromPlaylist, track.id];
+							return ({ result }) => {
+								isRemovingFromPlaylist = isRemovingFromPlaylist.filter((t) => t !== track.id);
+
+								if (result.type === 'error') toasts.error(result.error.message);
+								if (result.type === 'redirect') {
+									const url = new URL(`${$page.url.origin}${result.location}`);
+									const error = url.searchParams.get('error');
+									const success = url.searchParams.get('success');
+									if (error) toasts.error(error);
+									if (success) toasts.success(success);
+									invalidate(`/api/spotify/playlists/${$page.params.id}`);
+								}
+							};
+						}}
+					>
+						<input
+							hidden
+							name="track"
+							value={track.id}
+							disabled={isRemovingFromPlaylist.includes(track.id)}
+						/>
 						<button
 							type="submit"
 							title="Remove {track.name} from playlist"
