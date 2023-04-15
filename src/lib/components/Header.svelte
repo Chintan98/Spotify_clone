@@ -4,13 +4,15 @@
 	import { page } from '$app/stores';
 	import { ChevronDown, ExternalLink } from 'lucide-svelte';
 	import { tippy } from '$actions';
+
 	$: user = $page.data.user;
+	export let userAllPlaylists: SpotifyApi.PlaylistObjectSimplified[] | undefined;
 </script>
 
 <div class="content">
 	<div class="left">
 		{#if browser}
-			<Navigation desktop={false} />
+			<Navigation desktop={false} {userAllPlaylists} />
 		{/if}
 	</div>
 	<div class="right">

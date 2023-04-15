@@ -2,6 +2,14 @@
 	import type { ActionData as AddActionData } from '../../routes/playlists/new/$types';
 	import type { ActionData as EditActionData } from '../../routes/playlist/[id]/edit/$types';
 	import { Button } from '$components';
+	import { applyAction, enhance } from '$app/forms';
+	import { createEventDispatcher } from 'svelte';
+
+	let isLoading = false;
+	const dispatch = createEventDispatcher<{
+		success: {};
+		redirect: {};
+	}>();
 
 	export let form: AddActionData | EditActionData;
 	export let userID: string | undefined = undefined;
@@ -12,7 +20,23 @@
 		| undefined = undefined;
 </script>
 
-<form method="POST" {action}>
+<form
+	method="POST"
+	{action}
+	use:enhance={() => {
+		isLoading = true;
+		return async ({ result }) => {
+			await applyAction(result);
+			isLoading = false;
+			if (result.type === 'success') {
+				dispatch('success');
+			}
+			if (result.type === 'redirect') {
+				dispatch('redirect');
+			}
+		};
+	}}
+>
 	{#if userID}<input hidden name="userID" value={userID} />{/if}
 
 	<div class="field" class:has-error={form?.nameError}>
@@ -44,7 +68,9 @@
 	{/if}
 
 	<div class="submit-button">
-		<Button type="submit" element="button">{playlist ? 'Save Playlist' : 'Create Playlist'}</Button>
+		<Button type="submit" element="button" disabled={isLoading}
+			>{playlist ? 'Save Playlist' : 'Create Playlist'}</Button
+		>
 	</div>
 </form>
 

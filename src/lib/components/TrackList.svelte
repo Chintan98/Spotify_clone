@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { Player } from '$components';
 	import { msToTime } from '$helpers';
-	import { Clock8, ListPlus } from 'lucide-svelte';
+	import { tippy } from '$actions';
+	import { Clock8, ListPlus, ListX } from 'lucide-svelte';
 	import playingGif from '$assets/playing.gif';
+	import PlaylistForm from './PlaylistForm.svelte';
+	import Button from './Button.svelte';
 
 	let currentlyPlaying: string | null = null;
 	let isPaused: boolean = false;
 
 	export let tracks: SpotifyApi.TrackObjectFull[] | SpotifyApi.TrackObjectSimplified[];
+	export let isOwner: boolean = false;
+	export let userPlaylists: SpotifyApi.PlaylistObjectSimplified[] | undefined;
 </script>
 
 <div class="tracks">
@@ -21,7 +26,7 @@
 		<div class="duration-column">
 			<Clock8 aria-hidden focusable="false" />
 		</div>
-		<div class="actions-column" />
+		<div class="actions-column" class:is-owner={isOwner} />
 	</div>
 
 	{#each tracks as track, index}
@@ -62,8 +67,54 @@
 			<div class="duration-column">
 				<span class="duration">{msToTime(track.duration_ms)}</span>
 			</div>
-			<div class="actions-column">
-				<ListPlus aria-hidden focusable="true" />
+			<div class="actions-column" class:is-owner={isOwner}>
+				{#if isOwner}
+					<ListX aria-hidden focusable="false" />
+				{:else}
+					<button
+						title="Add {track.name} to a playlist"
+						aria-label="Add {track.name} to a playlist"
+						class="add-pl-button"
+						disabled={!userPlaylists}
+						use:tippy={{
+							content: document.getElementById(`${track.id}-playlists-menu`) || undefined,
+							allowHTML: true,
+							trigger: 'click',
+							interactive: true,
+							theme: 'menu',
+							placement: 'bottom-end',
+							onMount: () => {
+								const template = document.getElementById(`${track.id}-playlists-menu`);
+								if (template) {
+									template.style.display = 'block';
+								}
+							}
+						}}
+					>
+						<ListPlus aria-hidden focusable="false" />
+					</button>
+					{#if userPlaylists}
+						<div class="playlists-menu" style="display: none;" id="{track.id}-playlists-menu">
+							<div class="playlist-menu-content">
+								<form method="POST" action="">
+									<input hidden value={track.id} name={track.id} />
+									<div class="field">
+										<select name="playlist" aria-label="Playlist">
+											{#each userPlaylists as playlist}
+												<option value={playlist.id}>{playlist.name}</option>
+											{/each}
+										</select>
+									</div>
+									<div class="submit-button">
+										<Button element="button" type="submit">
+											Add <span class="visually-hidden">{track.name} to selected playlist.</span>
+										</Button>
+									</div>
+								</form>
+							</div>
+						</div>
+					{/if}
+				{/if}
 			</div>
 		</div>
 	{/each}
@@ -213,6 +264,36 @@
 			.actions-column {
 				width: 30px;
 				margin-left: 15px;
+				.add-pl-button {
+					background: none;
+					border: none;
+					padding: 5px;
+					cursor: pointer;
+					:global(svg) {
+						stroke: var(--text-color);
+						vertical-align: middle;
+						width: 22px;
+						height: 22px;
+					}
+					&.disabled {
+						opacity: 0.8;
+						cursor: not-allowed;
+					}
+				}
+				.playlist-menu-content {
+					padding: 15px;
+					.field {
+						select {
+							width: 100%;
+							height: 35px;
+							border-radius: 4px;
+						}
+					}
+					.submit-button {
+						margin-top: 10px;
+						text-align: right;
+					}
+				}
 			}
 		}
 	}

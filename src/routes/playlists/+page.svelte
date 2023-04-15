@@ -1,11 +1,17 @@
 <script lang="ts">
-	import { Button, Card, Pagination, Modal } from '$components';
-	import { toasts } from '$stores';
+	import { Button, Card, Pagination, Modal, PlaylistForm } from '$components';
 	import MicroModal from 'micromodal';
+	import { toasts } from '$stores';
 	import type { PageData } from './$types';
+	import type { ActionData } from './new/$types';
+
 	export let data: PageData;
+	export let form: ActionData;
+
 	let isLoading = false;
+
 	$: playlists = data.userPlaylists;
+
 	async function loadMoreItems() {
 		if (!playlists.next) return;
 		isLoading = true;
@@ -50,7 +56,9 @@
 	{/if}
 </div>
 
-<Modal id="add-playlist-modal" title="Add a New Playlist">Some Content</Modal>
+<Modal id="add-playlist-modal" title="Add a New Playlist">
+	<PlaylistForm {form} userID={data.user?.id} action="/playlists/new" />
+</Modal>
 
 <style lang="scss">
 	.content {

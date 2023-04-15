@@ -14,7 +14,8 @@ export const actions: Actions = {
 				name,
 				description,
 				nameError: 'Playlist name is required',
-				apiError: false
+				apiError: false,
+				editForm: true
 			});
 		}
 		const res = await fetch(`${SPOTIFY_BASE_URL}/playlists/${params.id}`, {
@@ -31,7 +32,8 @@ export const actions: Actions = {
 				name,
 				description,
 				nameError: false,
-				apiError: errorJSON?.error.message ?? 'An error has occured'
+				apiError: errorJSON?.error.message ?? 'An error has occured',
+				editForm: true
 			});
 		} else {
 			if (url.searchParams.has('redirect')) {
